@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  addok:
+    build:
+      context: addok
+    volumes:
+      - ./data:/data
+    environment:
+      ADDOK_HOST: "redis"
+      ADDOK_ATTRIBUTION: "BANO"
+      ADDOK_LICENCE: "ODbL"
+    ports:
+      - 7878:7878
+
+  redis:
+    image: redis:${REDIS_VERSION:-3.2-alpine}
+    volumes:
+      - redis_cache:/data
+    command: redis-server --save ""
+
+volumes:
+  redis_cache:
