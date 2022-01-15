@@ -34,13 +34,21 @@ def menu_parent_name(map, m)
     end
 end
 
+def any_hidden(map, m)
+    if m then
+        return m['hidden'] || any_hidden(map, m['parent_id'] && map[m['parent_id']])
+    else
+        false
+    end
+end
+
 def menu(url, project_theme, json)
     menu = JSON.parse(@download_cache.get(url).content)
     map = Hash[menu.collect{ |m| [m['id'], m] }]
     get_name = lambda { |m| (m['menu_group'] && m['menu_group']['name']['fr']) || (m['category'] && m['category']['name']['fr']) }
 
     filters_store = {}
-    index = menu.select{ |m| !m['hidden'] && (m['menu_group'] || m['category']) }.collect{ |m|
+    index = menu.select{ |m| !any_hidden(map, m) && (m['menu_group'] || m['category']) }.collect{ |m|
         name = menu_name(m)
         next if !name
         parent_name = menu_parent_name(map, m)
