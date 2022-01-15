@@ -22,7 +22,7 @@ sources:
 Setup configuration in `data` and fetch data:
 ```
 rm data/*.sjson
-docker-compose -f docker-compose-tools.yml run --rm t2addok ruby update.rb
+docker-compose -f docker-compose-tools.yml run --rm t2addok ruby update.rb /data/config.yaml
 ```
 
 # Run
