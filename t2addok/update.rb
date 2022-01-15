@@ -137,7 +137,7 @@ config = YAML.load(File.read(ARGV[0]))
 config['sources'].each { |source|
     api = source['api']
     project = source['project']
-    source['themes'].each [ |theme|
+    source['themes'].each { |theme|
         project_theme = "#{project}-#{theme}"
 
         menu_url = "#{api}/#{project}/#{theme}/menu"
