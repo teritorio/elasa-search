@@ -134,9 +134,8 @@ end
 
 
 config = YAML.load(File.read(ARGV[0]))
-config['sources'].each { |source|
+config['sources'].each { |project, source|
     api = source['api']
-    project = source['project']
     source['themes'].each { |theme|
         project_theme = "#{project}-#{theme}"
 

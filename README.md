@@ -12,8 +12,8 @@ docker-compose -f docker-compose.yml -f docker-compose-tools.yml build
 Setup configuration in `data/config.yaml`
 ```yaml
 sources:
-  - api: https://cdt40.carto.guide/api.teritorio/geodata/v0.1
-    project: cdt40
+  cdt40:
+    api: https://cdt40.carto.guide/api.teritorio/geodata/v0.1
     themes:
       - trourism
 ```
