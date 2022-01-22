@@ -48,7 +48,9 @@ def menu(url, project_theme, json)
     get_name = lambda { |m| (m['menu_group'] && m['menu_group']['name']['fr']) || (m['category'] && m['category']['name']['fr']) }
 
     filters_store = {}
-    index = menu.select{ |m| !any_hidden(map, m) && (m['menu_group'] || m['category']) }.collect{ |m|
+    index = menu.select{ |m| !any_hidden(map, m) && (m['menu_group'] || m['category']) }.each{ |m|
+        map[m['parent_id']][:non_leaf] = true if m['parent_id']
+    }.select{ |m| !m[:non_leaf] }.collect{ |m|
         name = menu_name(m)
         next if !name
         parent_name = menu_parent_name(map, m)
