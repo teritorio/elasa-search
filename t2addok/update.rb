@@ -45,10 +45,10 @@ end
 def menu(url, project_theme, json)
     menu = JSON.parse(@download_cache.get(url).content)
     map = Hash[menu.collect{ |m| [m['id'], m] }]
-    get_name = lambda { |m| (m['menu_group'] && m['menu_group']['name']['fr']) || (m['category'] && m['category']['name']['fr']) }
+    get_name = lambda { |m| m['category'] && m['category']['name']['fr'] }
 
     filters_store = {}
-    index = menu.select{ |m| !any_hidden(map, m) && (m['menu_group'] || m['category']) }.each{ |m|
+    index = menu.select{ |m| m['category'] && !any_hidden(map, m) }.each{ |m|
         map[m['parent_id']][:non_leaf] = true if m['parent_id']
     }.select{ |m| !m[:non_leaf] }.collect{ |m|
         name = menu_name(m)
