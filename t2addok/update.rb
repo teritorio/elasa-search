@@ -47,6 +47,7 @@ def menu(url, project_theme, json)
     map = Hash[menu.collect{ |m| [m['id'], m] }]
     get_name = lambda { |m| m['category'] && m['category']['name']['fr'] }
 
+    search_indexed = []
     filters_store = {}
     index = menu.select{ |m| m['category'] && !any_hidden(map, m) }.each{ |m|
         map[m['parent_id']][:non_leaf] = true if m['parent_id']
@@ -66,6 +67,8 @@ def menu(url, project_theme, json)
             filters_store[property] = (filters_store[property] || {}).update(Hash[values])
             values.map{ |value| [property, *value] }
         }.flatten(1) || []
+
+        search_indexed << m['category']['id'] if m['category']['search_indexed']
 
         ([[nil, nil, nil]] + filters).collect{ |filter_property, filter_value, filter_name|
             name_with_filter = filter_name ? "#{filter_name} (#{name})" : name
@@ -89,15 +92,16 @@ def menu(url, project_theme, json)
     }.compact.flatten(1)
 
     write_sjson(json, index)
-    filters_store
+    [search_indexed, filters_store]
 end
 
 
-def pois(url, project_theme, filters_store, json)
+def pois(url, project_theme, search_indexed, filters_store, json)
     pois = JSON.parse(@download_cache.get(url).content)
     filters_store_keys = filters_store.keys
 
     index = pois['features'].select{ |poi|
+        poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
         poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 180 &&
         poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
     }.collect{ |poi|
@@ -147,7 +151,7 @@ config['sources'].each { |project, source|
         menu = "/data/#{project_theme}-menu"
         pois = "/data/#{project_theme}-pois"
 
-        filters_store = menu(menu_url, project_theme, "#{menu}.sjson")
-        pois(pois_url, project_theme, filters_store, "#{pois}.sjson")
+        search_indexed, filters_store = menu(menu_url, project_theme, "#{menu}.sjson")
+        pois(pois_url, project_theme, search_indexed, filters_store, "#{pois}.sjson")
     }
 }
