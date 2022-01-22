@@ -32,6 +32,7 @@ docker-compose up -d
 
 # Data load
 ```
+docker-compose exec redis redis-cli FLUSHALL
 docker-compose exec addok bash -c "cat /data/*.sjson | addok batch && addok ngrams"
 docker-compose exec redis redis-cli BGSAVE
 ```
