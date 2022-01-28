@@ -7,7 +7,7 @@ services:
       - ./data:/data
     environment:
       ADDOK_HOST: "redis"
-      ADDOK_ATTRIBUTION: "BANO"
+      ADDOK_ATTRIBUTION: "Sirtaqui / OpenStreetMap"
       ADDOK_LICENCE: "ODbL"
     ports:
       - 7878:7878
