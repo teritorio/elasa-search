@@ -60,13 +60,15 @@ def menu(url, project_theme, json)
             property = filter['property']
             values = if filter['type'] == 'boolean' then
                 [[nil, filter['name']['fr'] || property]]
-            else
+            elsif filter["values"] then
                 filter["values"].map{ |v| [v['value'], v['name'] && v['name']['fr'] || v['value']] }
             end
-            values = values.filter{ |v| !v[1].nil? }
-            filters_store[property] = (filters_store[property] || {}).update(Hash[values])
-            values.map{ |value| [property, *value] }
-        }.flatten(1) || []
+            if values then
+                values = values.filter{ |v| !v[1].nil? }
+                filters_store[property] = (filters_store[property] || {}).update(Hash[values])
+                values.map{ |value| [property, *value] }
+            end
+        }.compact.flatten(1) || []
 
         search_indexed << m['category']['id'] if m['category']['search_indexed']
 
@@ -107,8 +109,8 @@ def pois(url, project_theme, search_indexed, filters_store, json)
     }.collect{ |poi|
         p = poi['properties']
         name = p['name'] && p['name'] != '' ? p['name'] : nil
-        class_label = p['editorial']['class_label']['fr']
-        name_class = name && class_label != name ? class_label + ' ' + name : nil
+        class_label = p['editorial'] && p['editorial']['class_label']['fr']
+        name_class = name && class_label && class_label != name ? class_label + ' ' + name : nil
 
         name_filters = p.keys.intersection(filters_store_keys).collect{ |property|
             values = p[property]
@@ -130,8 +132,8 @@ def pois(url, project_theme, search_indexed, filters_store, json)
             street: p['addr:street'],
             postcode: p['addr:postcode'],
             city: p['addr:city'],
-            icon: p['display']['icon'],
-            color: p['display']['color'],
+            icon: p['display'] && p['display']['icon'],
+            color: p['display'] && p['display']['color'],
         }
     }.select{ |m| m[:name].size > 0 }
 
