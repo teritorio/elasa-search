@@ -144,12 +144,13 @@ end
 
 config = YAML.load(File.read(ARGV[0]))
 config['sources'].each { |project, source|
+    puts project
     api = source['api']
     source['themes'].each { |theme|
         project_theme = "#{project}-#{theme}"
 
         menu_url = "#{api}/#{project}/#{theme}/menu"
-        pois_url = "#{api}/#{project}/#{theme}/pois"
+        pois_url = "#{api}/#{project}/#{theme}/pois?as_point=true&short_description=true"
 
         menu = "/data/#{project_theme}-menu"
         pois = "/data/#{project_theme}-pois"
