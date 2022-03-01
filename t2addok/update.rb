@@ -104,12 +104,13 @@ def pois(url, project_theme, search_indexed, filters_store, json)
 
     index = pois['features'].select{ |poi|
         poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
+        poi['geometry'] && poi['geometry']['coordinates'] &&
         poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 180 &&
         poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
     }.collect{ |poi|
         p = poi['properties']
         name = p['name'] && p['name'] != '' ? p['name'] : nil
-        class_label = p['editorial'] && p['editorial']['class_label']['fr']
+        class_label = p['editorial'] && p['editorial']['class_label'] && p['editorial']['class_label']['fr']
         name_class = name && class_label && class_label != name ? class_label + ' ' + name : nil
 
         name_filters = p.keys.intersection(filters_store_keys).collect{ |property|
