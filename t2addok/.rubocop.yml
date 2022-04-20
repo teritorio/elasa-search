@@ -1,0 +1,54 @@
+AllCops:
+  TargetRubyVersion: 3
+  NewCops: enable
+
+Layout/EmptyLines:
+  Enabled: false
+
+Style/MultilineBlockChain:
+  Enabled: false
+
+Style/NegatedIf:
+  Enabled: false
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: false
+
+Layout/SpaceBeforeBlockBraces:
+  Enabled: false
+
+Style/BlockDelimiters:
+  Enabled: false
+
+Layout/LineLength:
+  Enabled: false
+
+Style/InverseMethods:
+  Enabled: false
+
+Layout/FirstHashElementIndentation:
+  Enabled: false
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+Layout/IndentationWidth:
+  Enabled: false
+
+Layout/EndAlignment:
+  Enabled: false
+
+Style/TrailingCommaInArguments:
+  Enabled: false
+
+Layout/ElseAlignment:
+  Enabled: false
+
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false

@@ -11,12 +11,11 @@ require 'webcache'
 def write_sjson(json, index)
   File.open(json, 'w') { |f|
     index.each{ |row|
-      JSON.dump(row, io=f)
+      JSON.dump(row, io = f)
       f.write("\n")
     }
   }
 end
-
 
 def menu_name(m)
   (m['menu_group'] && m['menu_group']['name']['fr']) || (m['category'] && m['category']['name']['fr'])
@@ -24,19 +23,17 @@ end
 
 def menu_parent_name(map, m)
   parent_id = m['parent_id']
-  if parent_id then
+  if parent_id
     parent = map[parent_id]
 
     # Not name from first level bloc
-    if parent['parent_id'] then
-      menu_name(parent)
-    end
+    menu_name(parent) if parent['parent_id']
   end
 end
 
 def any_hidden(map, m)
-  if m then
-    return m['hidden'] || any_hidden(map, m['parent_id'] && map[m['parent_id']])
+  if m
+    m['hidden'] || any_hidden(map, m['parent_id'] && map[m['parent_id']])
   else
     false
   end
@@ -44,8 +41,8 @@ end
 
 def menu(url, project_theme, json)
   menu = JSON.parse(@download_cache.get(url).content)
-  map = Hash[menu.collect{ |m| [m['id'], m] }]
-  get_name = lambda { |m| m['category'] && m['category']['name']['fr'] }
+  map = menu.collect{ |m| [m['id'], m] }.to_h
+  get_name = ->(m) { m['category'] && m['category']['name']['fr'] }
 
   search_indexed = []
   filters_store = {}
@@ -54,20 +51,21 @@ def menu(url, project_theme, json)
   }.select{ |m| !m[:non_leaf] }.collect{ |m|
     name = menu_name(m)
     next if !name
+
     parent_name = menu_parent_name(map, m)
 
     filters = m['category'] && m['category']['filters'] && m['category']['filters'].collect{ |filter|
       property = filter['property']
-      values = if filter['type'] == 'boolean' then
-        [[nil, filter['name']['fr'] || property]]
-      elsif filter["values"] then
-        filter["values"].map{ |v| [v['value'], v['name'] && v['name']['fr'] || v['value']] }
+      values = if filter['type'] == 'boolean'
+          [[nil, filter['name']['fr'] || property]]
+        elsif filter['values']
+          filter['values'].map{ |v| [v['value'], v['name'] && v['name']['fr'] || v['value']] }
       end
-      if values then
-        values = values.filter{ |v| !v[1].nil? }
-        filters_store[property] = (filters_store[property] || {}).update(Hash[values])
-        values.map{ |value| [property, *value] }
-      end
+      next unless values
+
+      values = values.filter{ |v| !v[1].nil? }
+      filters_store[property] = (filters_store[property] || {}).update(values.to_h)
+      values.map{ |value| [property, *value] }
     }.compact.flatten(1) || []
 
     search_indexed << m['category']['id'] if m['category']['search_indexed']
@@ -97,16 +95,15 @@ def menu(url, project_theme, json)
   [search_indexed, filters_store]
 end
 
-
 def pois(url, project_theme, search_indexed, filters_store, json)
   pois = JSON.parse(@download_cache.get(url).content)
   filters_store_keys = filters_store.keys
 
   index = pois['features'].select{ |poi|
     poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
-    poi['geometry'] && poi['geometry']['coordinates'] &&
-    poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 180 &&
-    poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
+      poi['geometry'] && poi['geometry']['coordinates'] &&
+      poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 180 &&
+      poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
   }.collect{ |poi|
     p = poi['properties']
     name = p['name'] && p['name'] != '' ? p['name'] : nil
@@ -115,8 +112,8 @@ def pois(url, project_theme, search_indexed, filters_store, json)
 
     name_filters = p.keys.intersection(filters_store_keys).collect{ |property|
       values = p[property]
-      values = [values] if !values.kind_of?(Array)
-       ([nil] + values).collect{ |value| filters_store[property][value] }
+      values = [values] if !values.is_a?(Array)
+      ([nil] + values).collect{ |value| filters_store[property][value] }
     }.flatten.compact.uniq
 
     {
