@@ -151,7 +151,12 @@ config['sources'].each { |project, source|
     menu = "/data/#{project_theme}-menu"
     pois = "/data/#{project_theme}-pois"
 
-    search_indexed, filters_store = menu(menu_url, project_theme, "#{menu}.sjson")
-    pois(pois_url, project_theme, search_indexed, filters_store, "#{pois}.sjson")
+    begin
+      search_indexed, filters_store = menu(menu_url, project_theme, "#{menu}.sjson")
+      pois(pois_url, project_theme, search_indexed, filters_store, "#{pois}.sjson")
+    rescue StandardError => e
+      warn e.message
+      warn e.backtrace.join("\n")
+    end
   }
 }
