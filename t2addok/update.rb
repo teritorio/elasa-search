@@ -11,7 +11,7 @@ require 'webcache'
 def write_sjson(json, index)
   File.open(json, 'w') { |f|
     index.each{ |row|
-      JSON.dump(row, io = f)
+      JSON.dump(row, f)
       f.write("\n")
     }
   }
@@ -41,8 +41,7 @@ end
 
 def menu(url, project_theme, json)
   menu = JSON.parse(@download_cache.get(url).content)
-  map = menu.collect{ |m| [m['id'], m] }.to_h
-  get_name = ->(m) { m['category'] && m['category']['name']['fr'] }
+  map = menu.to_h{ |m| [m['id'], m] }
 
   search_indexed = []
   filters_store = {}
