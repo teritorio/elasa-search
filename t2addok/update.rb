@@ -47,7 +47,7 @@ def menu(url, project_theme, json)
   filters_store = {}
   index = menu.select{ |m| m['category'] && !any_hidden(map, m) }.each{ |m|
     map[m['parent_id']][:non_leaf] = true if m['parent_id']
-  }.select{ |m| !m[:non_leaf] }.collect{ |m|
+  }.select{ |m| !m[:non_leaf] && m['category']['search_indexed'] }.collect{ |m|
     name = menu_name(m)
     next if !name
 
@@ -67,7 +67,7 @@ def menu(url, project_theme, json)
       values.map{ |value| [property, *value] }
     }.compact.flatten(1) || []
 
-    search_indexed << m['category']['id'] if m['category']['search_indexed']
+    search_indexed << m['category']['id']
 
     ([[nil, nil, nil]] + filters).collect{ |filter_property, filter_value, filter_name|
       name_with_filter = filter_name ? "#{filter_name} (#{name})" : name
