@@ -11,6 +11,9 @@ docker-compose -f docker-compose.yml -f docker-compose-tools.yml build
 # Config
 Setup configuration in `data/config.yaml`
 ```yaml
+fetch_http_headers:
+  Secret: foo
+
 sources:
   cdt40:
     api: https://cdt40.carto.guide/api.teritorio/geodata/v0.1

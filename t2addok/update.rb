@@ -2,11 +2,14 @@
 
 require 'yaml'
 require 'json'
-require 'webcache'
+require 'http'
 
 
-@download_cache = WebCache.new(life: '6h', dir: '/data/cache')
+@config = YAML.load(File.read(ARGV[0]))
 
+def http_get(url)
+  HTTP.headers(@config['fetch_http_headers'] || {}).follow.get(url).body
+end
 
 def write_sjson(json, index)
   File.open(json, 'w') { |f|
@@ -40,7 +43,7 @@ def any_hidden(map, m)
 end
 
 def menu(url, project_theme, json)
-  menu = JSON.parse(@download_cache.get(url).content)
+  menu = JSON.parse(http_get(url))
   map = menu.to_h{ |m| [m['id'], m] }
 
   search_indexed = []
@@ -95,7 +98,7 @@ def menu(url, project_theme, json)
 end
 
 def pois(url, project_theme, search_indexed, filters_store, json)
-  pois = JSON.parse(@download_cache.get(url).content)
+  pois = JSON.parse(http_get(url))
   filters_store_keys = filters_store.keys
 
   index = pois['features'].select{ |poi|
@@ -138,8 +141,7 @@ def pois(url, project_theme, search_indexed, filters_store, json)
 end
 
 
-config = YAML.load(File.read(ARGV[0]))
-config['sources'].each { |project, source|
+@config['sources'].each { |project, source|
   puts project
   api = source['api']
   source['themes'].each { |theme|
