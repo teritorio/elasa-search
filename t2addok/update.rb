@@ -153,8 +153,8 @@ end
   source['themes'].each { |theme|
     project_theme = "#{project}-#{theme}"
 
-    menu_url = "#{api}/#{project}/#{theme}/menu"
-    pois_url = "#{api}/#{project}/#{theme}/pois?as_point=true&short_description=true"
+    menu_url = "#{api}/#{project}/#{theme}/menu.json"
+    pois_url = "#{api}/#{project}/#{theme}/pois.geojson?as_point=true&short_description=true"
 
     menu = "/data/#{project_theme}-menu"
     pois = "/data/#{project_theme}-pois"
