@@ -107,7 +107,8 @@ def pois(url, project_theme, search_indexed, filters_store, json)
   filters_store_keys = filters_store.keys
 
   index = pois['features'].select{ |poi|
-    poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
+    poi['properties']['metadata']['category_ids'] &&
+      poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
       poi['geometry'] && poi['geometry']['coordinates'] &&
       poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 180 &&
       poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
