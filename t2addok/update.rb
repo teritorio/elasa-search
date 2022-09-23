@@ -3,6 +3,7 @@
 require 'yaml'
 require 'json'
 require 'http'
+require 'turf_ruby'
 
 
 @config = YAML.load(File.read(ARGV[0]))
@@ -102,11 +103,22 @@ def menu(url, project_theme, json)
   [search_indexed, filters_store]
 end
 
+def centroid(feature)
+  if feature['geometry'] && feature['geometry']['coordinates']
+    point = Turf.centroid(feature)
+    feature['geometry']['type'] = point[:geometry][:type]
+    feature['geometry']['coordinates'] = point[:geometry][:coordinates]
+  end
+  feature
+end
+
 def pois(url, project_theme, search_indexed, filters_store, json)
   pois = JSON.parse(http_get(url))
   filters_store_keys = filters_store.keys
 
-  index = pois['features'].select{ |poi|
+  index = pois['features'].collect{ |poi|
+    centroid(poi)
+  }.select{ |poi|
     poi['properties']['metadata']['category_ids'] &&
       poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
       poi['geometry'] && poi['geometry']['coordinates'] &&
