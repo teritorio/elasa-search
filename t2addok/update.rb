@@ -66,7 +66,7 @@ def menu(url, project_theme, json)
       property = filter['property']
       values = if filter['type'] == 'boolean'
           [[nil, filter['name']['fr'] || property]]
-        elsif filter['values']
+        elsif filter['values'] && filter['values'].kind_of?(Array)
           filter['values'].map{ |v| [v['value'], v['name'] && v['name']['fr'] || v['value']] }
       end
       next unless values
