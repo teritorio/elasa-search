@@ -11,14 +11,14 @@ services:
       ADDOK_LICENCE: "ODbL"
     ports:
       - 7878:7878
-#    restart: unless-stopped
+    restart: unless-stopped
 
   redis:
     image: redis:${REDIS_VERSION:-3.2-alpine}
     volumes:
       - redis_cache:/data
     command: redis-server --save ""
-#    restart: unless-stopped
+    restart: unless-stopped
 
 volumes:
   redis_cache:
