@@ -76,7 +76,7 @@ def menu(url, project_theme, json)
       values.map{ |value| [property, *value] }
     }.compact.flatten(1) || []
 
-    search_indexed << m['category']['id']
+    search_indexed << m['id']
 
     ([[nil, nil, nil]] + filters).collect{ |filter_property, filter_value, filter_name|
       name_with_filter = filter_name ? "#{filter_name} (#{name})" : name
