@@ -122,7 +122,7 @@ def pois(url, project_theme, search_indexed, filters_store, json)
     poi['properties']['metadata']['category_ids'] &&
       poi['properties']['metadata']['category_ids'].intersection(search_indexed).size > 0 &&
       poi['geometry'] && poi['geometry']['coordinates'] &&
-      poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 180 &&
+      poi['geometry']['coordinates'][0] > -180 && poi['geometry']['coordinates'][0] < 360 &&
       poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
   }.collect{ |poi|
     p = poi['properties']
