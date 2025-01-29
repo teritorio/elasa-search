@@ -3,6 +3,7 @@ services:
   addok:
     build:
       context: addok
+    image: ghcr.io/teritorio/elasa-search:master
     volumes:
       - ./data:/data
     environment:
