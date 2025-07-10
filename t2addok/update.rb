@@ -65,7 +65,7 @@ def menu(url, project_theme, json)
     filters = m['category'] && m['category']['filters'] && m['category']['filters'].collect{ |filter|
       property = filter['property']
       values = if filter['type'] == 'boolean'
-          [[nil, filter['name']['fr'] || property]]
+          [[nil, filter['name'] && filter['name']['fr'] || property]]
         elsif filter['values'] && filter['values'].kind_of?(Array)
           filter['values'].map{ |v| [v['value'], v['name'] && v['name']['fr'] || v['value']] }
       end
@@ -105,7 +105,7 @@ end
 
 def centroid(feature)
   if feature['geometry'] && feature['geometry']['coordinates']
-    point = Turf.centroid(feature)
+    point = Turf.centroid(feature['geometry'].transform_keys(&:to_sym))
     feature['geometry']['type'] = point[:geometry][:type]
     feature['geometry']['coordinates'] = point[:geometry][:coordinates]
   end
