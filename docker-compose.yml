@@ -1,4 +1,13 @@
 services:
+  t2addok:
+    profiles:
+      - tools
+    build:
+      context: t2addok
+    volumes:
+      - ./data:/data
+      - ./t2addok/update.rb:/update.rb
+
   addok:
     build:
       context: addok
