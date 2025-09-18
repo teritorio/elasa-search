@@ -1,12 +1,12 @@
-FROM python:3.8
+FROM python:3.13-slim
 
 ARG ADDOK_VERSION
-ENV ADDOK_VERSION ${ADDOK_VERSION:-1.1.0-rc1}
+ENV ADDOK_VERSION ${ADDOK_VERSION:-1.2.1}
 ENV ADDOK_FR_VERSION 1.0.1
-ENV ADDOK_FRANCE_VERSION 1.1.0
+ENV ADDOK_FRANCE_VERSION 1.1.3
 
 RUN apt-get -q update && \
-    apt-get -qy install redis-tools jq && \
+    apt-get -qy install redis-tools jq g++ wget && \
     \
     pip install gunicorn addok==${ADDOK_VERSION} addok-fr==${ADDOK_FR_VERSION} addok-france==${ADDOK_FRANCE_VERSION} && \
     mkdir /etc/addok && \
