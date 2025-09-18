@@ -18,10 +18,18 @@ RUN apt-get -q update && \
     echo -n > /var/lib/apt/extended_states && \
     rm -rf /tmp/* /var/lib/apt/lists/* /var/tmp/*
 
-EXPOSE 7878
-
 ADD ./addok.conf /etc/addok/addok.conf
 
 ENTRYPOINT ["gunicorn"]
 
 CMD ["--bind", "0.0.0.0:7878", "--timeout", "7200", "--workers", "8", "addok.http.wsgi"]
+
+EXPOSE 7878
+
+HEALTHCHECK \
+    --start-interval=1s \
+    --start-period=30s \
+    --interval=30s \
+    --timeout=20s \
+    --retries=5 \
+    CMD wget --no-verbose --tries=1 -O /dev/null http://127.0.0.1:7878/health || exit 1
