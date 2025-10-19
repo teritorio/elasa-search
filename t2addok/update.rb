@@ -9,7 +9,8 @@ require 'turf_ruby'
 @config = YAML.load(File.read(ARGV[0]))
 
 def http_get(url)
-  resp = HTTP.headers(@config['fetch_http_headers'] || {}).follow.get(url)
+  fetch_http_headers = ENV['FETCH_HTTP_HEADERS'].empty? {} : { ENV['FETCH_HTTP_HEADERS'] => true}
+  resp = HTTP.headers(fetch_http_headers).follow.get(url)
   if resp.status.success?
     resp.body
   else

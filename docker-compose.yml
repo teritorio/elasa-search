@@ -7,6 +7,8 @@ services:
     volumes:
       - ./data:/data
       - ./t2addok/update.rb:/update.rb
+    environment:
+      FETCH_HTTP_HEADERS: ${FETCH_HTTP_HEADERS:-}
 
   addok:
     build:
