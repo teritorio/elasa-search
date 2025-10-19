@@ -1,15 +1,12 @@
 #!/usr/bin/ruby
 
-require 'yaml'
 require 'json'
 require 'http'
 require 'turf_ruby'
 
 
-@config = YAML.load(File.read(ARGV[0]))
-
 def http_get(url)
-  fetch_http_headers = ENV['FETCH_HTTP_HEADERS'].empty? {} : { ENV['FETCH_HTTP_HEADERS'] => true}
+  fetch_http_headers = !ENV['FETCH_HTTP_HEADERS']&.empty? ? { ENV['FETCH_HTTP_HEADERS'] => true } : {}
   resp = HTTP.headers(fetch_http_headers).follow.get(url)
   if resp.status.success?
     resp.body
@@ -160,14 +157,16 @@ def pois(url, project_theme, search_indexed, filters_store, json)
 end
 
 
-@config['sources'].each { |project, source|
-  puts project
-  api = source['api']
-  source['themes'].each { |theme|
-    project_theme = "#{project}-#{theme}"
+api = ARGV[0]
+projects = JSON.parse(http_get(api))
+projects.each_value{ |project|
+  project['themes'].each_value{ |theme|
+    project_theme = "#{project['slug']}-#{theme['slug']}"
+    puts project_theme
 
-    menu_url = "#{api}/#{project}/#{theme}/menu.json"
-    pois_url = "#{api}/#{project}/#{theme}/pois.geojson?as_point=true&short_description=true"
+    api_theme = "#{api}/#{project['slug']}/#{theme['slug']}/"
+    menu_url = "#{api_theme}/menu.json"
+    pois_url = "#{api_theme}/pois.geojson?as_point=true&short_description=true"
 
     menu = "/data/#{project_theme}-menu"
     pois = "/data/#{project_theme}-pois"

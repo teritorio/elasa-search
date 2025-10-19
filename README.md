@@ -22,7 +22,7 @@ sources:
 Setup configuration in `data` and fetch data:
 ```
 rm data/*.sjson
-docker compose --profile '*' run --rm t2addok ruby update.rb /data/config.yaml
+docker compose --profile '*' run --rm t2addok ruby update.rb https://elasa-dev.teritorio.xyz/api/0.1
 ```
 
 # Run
