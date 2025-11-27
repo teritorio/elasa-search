@@ -8,16 +8,6 @@ Convert Elesa Menu and POIs to Addok format, then search on these.
 docker compose --profile '*' build
 ```
 
-# Config
-Setup configuration in `data/config.yaml`
-```yaml
-sources:
-  cdt40:
-    api: https://cdt40.carto.guide/api.teritorio/geodata/v0.1
-    themes:
-      - trourism
-```
-
 # Initialize data
 Setup configuration in `data` and fetch data:
 ```
