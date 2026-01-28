@@ -144,7 +144,7 @@ def pois(url, project_theme, search_indexed, filters_store, json)
       name: ([
         name,
         name_class,
-      ] + name_filters.map{ |name_filter| "#{name} #{name_filter}" }).compact,
+      ] + name_filters.map{ |name_filter| "#{name} #{name_filter}" }).compact.sort,
       street: p['addr:street'],
       postcode: p['addr:postcode'],
       city: p['addr:city'],
