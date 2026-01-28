@@ -12,7 +12,7 @@ docker compose --profile '*' build
 Setup configuration in `data` and fetch data:
 ```
 rm data/*.sjson
-docker compose --profile '*' run --rm t2addok ruby update.rb https://elasa-dev.teritorio.xyz/api/0.1
+docker compose --profile '*' run --rm t2addok ruby update.rb https://elasa-dev.teritorio.xyz/api/0.2
 ```
 
 # Run

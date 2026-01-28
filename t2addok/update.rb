@@ -24,6 +24,22 @@ def write_sjson(json, index)
   }
 end
 
+def property_i18n_to_text(property)
+  return if property.nil? || property.empty?
+
+  return property if property.is_a?(String) || property.is_a?(Numeric)
+
+  if property.is_a?(Object)
+    property = property['fr-FR'] || property['fr'] || property['en-US'] || property['en'] || property.first[1]
+  end
+
+  if property.is_a?(Array)
+    property = property.join(' ')
+  end
+
+  property
+end
+
 def menu_name(m)
   (m['menu_group'] && m['menu_group']['name']['fr']) || (m['category'] && m['category']['name']['fr'])
 end
@@ -60,19 +76,20 @@ def menu(url, project_theme, json)
 
     parent_name = menu_parent_name(map, m)
 
-    filters = m['category'] && m['category']['filters'] && m['category']['filters'].collect{ |filter|
+    filters = (m.dig('category', 'filters') || []).collect{ |filter|
       property = filter['property']
       values = if filter['type'] == 'boolean'
-          [[nil, filter['name'] && filter['name']['fr'] || property]]
+          [[nil, filter['name'] && filter['name']['fr'] || property.join(' ')]]
         elsif filter['values'] && filter['values'].kind_of?(Array)
-          filter['values'].map{ |v| [v['value'], v['name'] && v['name']['fr'] || v['value']] }
+          filter['values'].map{ |v| [v['value'], property_i18n_to_text(v['name']) || v['value']] }
       end
       next unless values
 
       values = values.filter{ |v| !v[1].nil? }
-      filters_store[property] = (filters_store[property] || {}).update(values.to_h)
-      values.map{ |value| [property, *value] }
-    }.compact.flatten(1) || []
+
+      filters_store[property.join(':')] = (filters_store[property.join(':')] || {}).update(values.to_h)
+      values.map{ |value| [property.join(':'), *value] }
+    }.compact.flatten(1)
 
     search_indexed << m['id']
 
@@ -89,8 +106,8 @@ def menu(url, project_theme, json)
           name_with_filter,
           parent_name ? parent_name + ' ' + name_with_filter : nil
         ].compact,
-        icon: m['menu_group']&.[]('icon') || m['category']&.[]('icon'),
-        color: m['menu_group']&.[]('color') || m['category']&.[]('color'),
+        icon: m.dig('menu_group', 'icon') || m.dig('category', 'icon'),
+        color: m.dig('menu_group', 'color') || m.dig('category', 'color'),
         filter_property: filter_property,
         filter_value: filter_value,
       }
@@ -98,7 +115,7 @@ def menu(url, project_theme, json)
   }.compact.flatten(1)
 
   write_sjson(json, index)
-  [search_indexed, filters_store]
+  [search_indexed, filters_store, map]
 end
 
 def centroid(feature)
@@ -110,9 +127,9 @@ def centroid(feature)
   feature
 end
 
-def pois(url, project_theme, search_indexed, filters_store, json)
+def pois(url, menu_map, project_theme, search_indexed, filters_store, json)
   pois = JSON.parse(http_get(url))
-  filters_store_keys = filters_store.keys
+  filters_store_keys = filters_store.keys.collect{ |k| k.start_with?('route:') || k.start_with?('addr:') ? k.split(':') : [k] }
 
   index = pois['features'].collect{ |poi|
     centroid(poi)
@@ -124,32 +141,36 @@ def pois(url, project_theme, search_indexed, filters_store, json)
       poi['geometry']['coordinates'][1] > -90 && poi['geometry']['coordinates'][1] < 90
   }.collect{ |poi|
     p = poi['properties']
-    name = p['name'] && p['name'] != '' ? p['name'] : nil
-    class_label = p['editorial'] && p['editorial']['class_label'] && p['editorial']['class_label']['fr']
+    name = property_i18n_to_text(p['name'])
+    category_id = poi['properties']['metadata']['category_ids'].find{ |category_id| menu_map[category_id] }
+    category = menu_map[category_id]['category']
+    class_label = property_i18n_to_text(category.dig('editorial', 'class_label'))
     name_class = name && class_label && class_label != name ? class_label + ' ' + name : nil
 
-    name_filters = p.keys.intersection(filters_store_keys).collect{ |property|
-      values = p[property]
+    name_filters = filters_store_keys.collect{ |property|
+      values = p.dig(*property)
+      next if values.nil?
+
       values = [values] if !values.is_a?(Array)
-      ([nil] + values).collect{ |value| filters_store[property][value] }
-    }.flatten.compact.uniq
+      ([nil] + values).collect{ |value| property_i18n_to_text(filters_store[property.join(':')][value]) }
+    }.compact.flatten.compact.uniq
 
     {
       id: p['metadata']['id'],
       project_theme: project_theme,
       type: 'poi',
       importance: name_class ? 0.6 : 0.5,
-      lon: poi['geometry']['coordinates'][0],
-      lat: poi['geometry']['coordinates'][1],
+      lon: poi['geometry']['coordinates'][0].round(9),
+      lat: poi['geometry']['coordinates'][1].round(9),
       name: ([
         name,
         name_class,
       ] + name_filters.map{ |name_filter| "#{name} #{name_filter}" }).compact.sort,
-      street: p['addr:street'],
-      postcode: p['addr:postcode'],
-      city: p['addr:city'],
-      icon: p['display'] && p['display']['icon'],
-      color: p['display'] && p['display']['color'],
+      street: p.dig('addr', 'street'),
+      postcode: p.dig('addr', 'postcode'),
+      city: p.dig('addr', 'city'),
+      icon: category['icon'],
+      color: p.dig('display', 'color_fill') || category['color_fill']
     }
   }.select{ |m| m[:name].size > 0 }
 
@@ -172,8 +193,8 @@ projects.each_value{ |project|
     pois = "/data/#{project_theme}-pois"
 
     begin
-      search_indexed, filters_store = menu(menu_url, project_theme, "#{menu}.sjson")
-      pois(pois_url, project_theme, search_indexed, filters_store, "#{pois}.sjson")
+      search_indexed, filters_store, menu_map = menu(menu_url, project_theme, "#{menu}.sjson")
+      pois(pois_url, menu_map, project_theme, search_indexed, filters_store, "#{pois}.sjson")
     rescue StandardError => e
       warn e.message
       warn e.backtrace.join("\n")
