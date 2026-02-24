@@ -25,7 +25,7 @@ def write_sjson(json, index)
 end
 
 def property_i18n_to_text(property)
-  return if property.nil? || property.empty?
+  return if property.nil?
 
   return property if property.is_a?(String) || property.is_a?(Numeric)
 
