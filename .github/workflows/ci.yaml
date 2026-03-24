@@ -16,7 +16,16 @@ jobs:
       id-token: write
 
     steps:
-      - name: Docker Build and Push
+      - name: Docker Build and Push t2addok
         uses: cartoway/docker-compose-build-push-action@main
         with:
           registry_password: ${{ secrets.GITHUB_TOKEN }}
+          project: teritorio/elasa-search-t2addok
+          service: t2addok
+
+      - name: Docker Build and Push Addok
+        uses: cartoway/docker-compose-build-push-action@main
+        with:
+          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          project: teritorio/elasa-search-addok
+          service: addok

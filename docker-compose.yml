@@ -4,6 +4,7 @@ services:
       - tools
     build:
       context: t2addok
+    image: ghcr.io/teritorio/elasa-search-t2addok:master
     volumes:
       - ./data:/data
       - ./t2addok/update.rb:/update.rb
@@ -13,7 +14,7 @@ services:
   addok:
     build:
       context: addok
-    image: ghcr.io/teritorio/elasa-search:master
+    image: ghcr.io/teritorio/elasa-search-addok:master
     volumes:
       - ./data:/data
     environment:
